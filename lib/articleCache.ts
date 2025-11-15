@@ -57,10 +57,16 @@ export function cacheArticles(articles: any[], createId: (article: any) => strin
  */
 export function clearExpiredCache(): void {
   const now = Date.now()
-  for (const [id, cached] of articleCache.entries()) {
+  const keysToDelete: string[] = []
+  
+  articleCache.forEach((cached, id) => {
     if (now - cached.timestamp > CACHE_TTL) {
-      articleCache.delete(id)
+      keysToDelete.push(id)
     }
-  }
+  })
+  
+  keysToDelete.forEach((id) => {
+    articleCache.delete(id)
+  })
 }
 
