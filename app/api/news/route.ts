@@ -7,8 +7,12 @@ export async function GET() {
   const apiKey = process.env.NEWS_API_KEY
 
   if (!apiKey) {
+    console.error('NEWS_API_KEY is not set in environment variables')
     return NextResponse.json(
-      { error: 'NewsAPI key is not configured' },
+      { 
+        error: 'NewsAPI key is not configured',
+        message: 'Please set NEWS_API_KEY in your environment variables'
+      },
       { status: 500 }
     )
   }
@@ -27,13 +31,18 @@ export async function GET() {
     )
 
     if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      console.error('NewsAPI everything endpoint failed:', response.status, errorData)
+      
       // Fallback to top headlines if everything endpoint fails
       const fallbackResponse = await fetch(
         `https://newsapi.org/v2/top-headlines?category=business&country=us&pageSize=10&apiKey=${apiKey}`
       )
       
       if (!fallbackResponse.ok) {
-        throw new Error('Failed to fetch news')
+        const fallbackError = await fallbackResponse.json().catch(() => ({}))
+        console.error('NewsAPI top-headlines endpoint failed:', fallbackResponse.status, fallbackError)
+        throw new Error(`Failed to fetch news: ${fallbackResponse.status}`)
       }
       
       const fallbackData: NewsApiResponse = await fallbackResponse.json()
@@ -68,8 +77,13 @@ export async function GET() {
     })
   } catch (error) {
     console.error('Error fetching news:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to fetch news' },
+      { 
+        error: 'Failed to fetch news',
+        message: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? String(error) : undefined
+      },
       { status: 500 }
     )
   }
