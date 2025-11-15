@@ -2,9 +2,9 @@
 
 ## Environment Variables
 
-To deploy this application to Vercel, you need to add the following environment variable:
+To deploy this application to Vercel, you need to add at least ONE of the following environment variables:
 
-### Required Environment Variable
+### Option 1: NewsAPI (Original)
 
 1. Go to your Vercel project dashboard
 2. Navigate to **Settings** → **Environment Variables**
@@ -16,12 +16,33 @@ Value: your_newsapi_key_here
 Environment: Production, Preview, Development (select all)
 ```
 
-### Getting Your NewsAPI Key
+**Get your NewsAPI key:**
+- Visit [https://newsapi.org/](https://newsapi.org/)
+- Sign up for a free account
+- Get your API key from the dashboard
+- Free tier: 100 requests/day
 
-1. Visit [https://newsapi.org/](https://newsapi.org/)
-2. Sign up for a free account
-3. Get your API key from the dashboard
-4. Copy the API key and paste it into Vercel's environment variables
+### Option 2: GNews API (Recommended - More Generous Free Tier)
+
+1. Go to your Vercel project dashboard
+2. Navigate to **Settings** → **Environment Variables**
+3. Add the following variable:
+
+```
+Name: GNEWS_API_KEY
+Value: your_gnews_key_here
+Environment: Production, Preview, Development (select all)
+```
+
+**Get your GNews API key:**
+- Visit [https://gnews.io/](https://gnews.io/)
+- Sign up for a free account
+- Get your API key from the dashboard
+- Free tier: 100 requests/day, but more reliable
+
+### Using Both APIs (Recommended)
+
+You can add BOTH API keys for automatic fallback. If one fails, the app will automatically try the other.
 
 ### Important Notes
 
