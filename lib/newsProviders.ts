@@ -100,9 +100,19 @@ export async function fetchNewsWithFallback(providers: NewsProvider[], apiKeys: 
 
   for (const provider of providers) {
     try {
-      const apiKey = apiKeys[provider.name.toLowerCase().replace('api', '').trim()]
+      // Fix: Map provider names correctly to API key names
+      let keyName = ''
+      if (provider.name === 'NewsAPI') {
+        keyName = 'newsapi'
+      } else if (provider.name === 'GNews') {
+        keyName = 'gnews'
+      } else {
+        keyName = provider.name.toLowerCase().replace('api', '').trim()
+      }
+      
+      const apiKey = apiKeys[keyName]
       if (!apiKey) {
-        console.warn(`${provider.name} API key not configured, skipping...`)
+        console.warn(`${provider.name} API key not configured (looking for key: ${keyName}), skipping...`)
         continue
       }
 
@@ -137,7 +147,17 @@ export async function searchArticleById(
   // Try each provider
   for (const provider of providers) {
     try {
-      const apiKey = apiKeys[provider.name.toLowerCase().replace('api', '').trim()]
+      // Fix: Map provider names correctly to API key names
+      let keyName = ''
+      if (provider.name === 'NewsAPI') {
+        keyName = 'newsapi'
+      } else if (provider.name === 'GNews') {
+        keyName = 'gnews'
+      } else {
+        keyName = provider.name.toLowerCase().replace('api', '').trim()
+      }
+      
+      const apiKey = apiKeys[keyName]
       if (!apiKey) continue
 
       // For GNews, try multiple pages
