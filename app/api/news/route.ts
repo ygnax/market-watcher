@@ -4,10 +4,19 @@ import { createArticleId } from '@/lib/utils'
 import { cacheArticles } from '@/lib/articleCache'
 import { fetchNewsWithFallback, newsApiProvider, gNewsProvider } from '@/lib/newsProviders'
 
+// ============================================================================
+// TEMPORARY: Hardcoded API keys for testing on Vercel
+// TODO: Remove this section and use environment variables only after testing
+// ============================================================================
+const HARDCODED_NEWS_API_KEY = '' // Paste your NewsAPI key here (from newsapi.org)
+const HARDCODED_GNEWS_API_KEY = '' // Paste your GNews API key here (from gnews.io)
+// ============================================================================
+
 export async function GET() {
   // Support multiple API providers
-  const newsApiKey = process.env.NEWS_API_KEY
-  const gNewsApiKey = process.env.GNEWS_API_KEY
+  // Use hardcoded keys if env vars are not set (for testing)
+  const newsApiKey = process.env.NEWS_API_KEY || HARDCODED_NEWS_API_KEY || ''
+  const gNewsApiKey = process.env.GNEWS_API_KEY || HARDCODED_GNEWS_API_KEY || ''
 
   // Check if at least one API key is configured
   if (!newsApiKey && !gNewsApiKey) {

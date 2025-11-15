@@ -4,6 +4,14 @@ import { createArticleId, getUrlHashFromId } from '@/lib/utils'
 import { getCachedArticle } from '@/lib/articleCache'
 import { searchArticleById, newsApiProvider, gNewsProvider } from '@/lib/newsProviders'
 
+// ============================================================================
+// TEMPORARY: Hardcoded API keys for testing on Vercel
+// TODO: Remove this section and use environment variables only after testing
+// ============================================================================
+const HARDCODED_NEWS_API_KEY = '' // Paste your NewsAPI key here (from newsapi.org)
+const HARDCODED_GNEWS_API_KEY = '' // Paste your GNews API key here (from gnews.io)
+// ============================================================================
+
 // Simple hash function (must match the one in utils.ts)
 function simpleHash(str: string): string {
   let hash = 0
@@ -20,8 +28,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   // Support multiple API providers
-  const newsApiKey = process.env.NEWS_API_KEY
-  const gNewsApiKey = process.env.GNEWS_API_KEY
+  // Use hardcoded keys if env vars are not set (for testing)
+  const newsApiKey = process.env.NEWS_API_KEY || HARDCODED_NEWS_API_KEY || ''
+  const gNewsApiKey = process.env.GNEWS_API_KEY || HARDCODED_GNEWS_API_KEY || ''
   // Next.js already decodes the URL parameter automatically
   const articleId = params.id
 
