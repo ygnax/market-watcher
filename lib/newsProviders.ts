@@ -124,3 +124,74 @@ export async function fetchNewsWithFallback(providers: NewsProvider[], apiKeys: 
   throw new Error(`All news providers failed:\n${errors.join('\n')}`)
 }
 
+/**
+ * Search for a specific article across multiple pages
+ * Used for finding articles by ID
+ */
+export async function searchArticleById(
+  articleId: string,
+  createIdFn: (article: Article) => string,
+  providers: NewsProvider[],
+  apiKeys: Record<string, string | undefined>
+): Promise<Article | null> {
+  // Try each provider
+  for (const provider of providers) {
+    try {
+      const apiKey = apiKeys[provider.name.toLowerCase().replace('api', '').trim()]
+      if (!apiKey) continue
+
+      // For GNews, try multiple pages
+      if (provider.name === 'GNews') {
+        for (let page = 1; page <= 3; page++) {
+          try {
+            const response = await fetch(
+              `https://gnews.io/api/v4/top-headlines?category=business&lang=en&country=us&max=100&page=${page}&apikey=${apiKey}`
+            )
+            
+            if (response.ok) {
+              const data = await response.json()
+              const articles: Article[] = (data.articles || []).map((article: any) => ({
+                title: article.title || '',
+                description: article.description || '',
+                content: article.content || article.description || '',
+                publishedAt: article.publishedAt || new Date().toISOString(),
+                source: { name: article.source?.name || 'Unknown' },
+                url: article.url || '',
+                urlToImage: article.image || undefined,
+              }))
+
+              const found = articles.find((a) => createIdFn(a) === articleId)
+              if (found) return found
+            }
+          } catch (e) {
+            continue
+          }
+        }
+      }
+
+      // For NewsAPI, try multiple pages
+      if (provider.name === 'NewsAPI') {
+        for (let page = 1; page <= 5; page++) {
+          try {
+            const response = await fetch(
+              `https://newsapi.org/v2/top-headlines?category=business&country=us&pageSize=100&page=${page}&apiKey=${apiKey}`
+            )
+            
+            if (response.ok) {
+              const data = await response.json()
+              const found = data.articles?.find((a: Article) => createIdFn(a) === articleId)
+              if (found) return found
+            }
+          } catch (e) {
+            continue
+          }
+        }
+      }
+    } catch (error) {
+      continue
+    }
+  }
+
+  return null
+}
+
