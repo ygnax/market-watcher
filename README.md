@@ -14,7 +14,9 @@ A minimal Next.js application for displaying stock market news, similar to Seeki
 ### Prerequisites
 
 - Node.js 18+ installed
-- A free NewsAPI key from [https://newsapi.org/](https://newsapi.org/)
+- At least ONE free news API key (you can use multiple for fallback):
+  - **NewsAPI**: [https://newsapi.org/](https://newsapi.org/) - 100 requests/day
+  - **GNews API**: [https://gnews.io/](https://gnews.io/) - 100 requests/day (recommended)
 
 ### Installation
 
@@ -25,8 +27,18 @@ npm install
 
 2. Create a `.env.local` file in the root directory:
 ```env
-NEWS_API_KEY=your_api_key_here
+# Option 1: NewsAPI (original)
+NEWS_API_KEY=your_newsapi_key_here
+
+# Option 2: GNews API (recommended - more reliable)
+GNEWS_API_KEY=your_gnews_key_here
+
+# Option 3: Use both for automatic fallback (recommended)
+NEWS_API_KEY=your_newsapi_key_here
+GNEWS_API_KEY=your_gnews_key_here
 ```
+
+**Note**: The app supports multiple news APIs with automatic fallback. If one API fails, it will automatically try the other. You only need at least one API key, but using both provides better reliability.
 
 3. Run the development server:
 ```bash
@@ -70,7 +82,12 @@ market-watcher/
 
 ## API Integration
 
-This application uses the NewsAPI free tier to fetch stock market news. The API is called server-side through Next.js API routes to keep the API key secure.
+This application supports multiple free news APIs with automatic fallback:
+
+- **NewsAPI** ([newsapi.org](https://newsapi.org/)) - Original provider
+- **GNews API** ([gnews.io](https://gnews.io/)) - Alternative provider (recommended)
+
+The APIs are called server-side through Next.js API routes to keep API keys secure. If one API fails or reaches its rate limit, the app automatically falls back to the other provider.
 
 ## License
 
