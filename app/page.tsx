@@ -1,46 +1,13 @@
 import Header from '@/components/Header'
 import ArticleList from '@/components/ArticleList'
-import type { Article, NewsApiResponse } from '@/types/article'
+import { fetchNews } from '@/lib/fetchNews'
 
-async function getNews(): Promise<{ articles: Article[]; error?: string }> {
-  try {
-    // Use absolute URL for server-side fetch
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-    const response = await fetch(`${baseUrl}/api/news`, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      const errorMessage = errorData.message || errorData.error || 'Failed to fetch news'
-      
-      // Return error message for display
-      return { 
-        articles: [],
-        error: errorMessage
-      }
-    }
-
-    const data: NewsApiResponse = await response.json()
-    
-    // Check if API returned an error in the response
-    if (data.status === 'error' || data.articles?.length === 0) {
-      return {
-        articles: [],
-        error: 'No articles available at the moment. Please try again later.'
-      }
-    }
-    
-    return { articles: data.articles.slice(0, 10) } // Get latest 10 articles
-  } catch (error) {
-    console.error('Error fetching news:', error)
-    return {
-      articles: [],
-      error: 'Unable to connect to the news service. Please check your internet connection and try again.'
-    }
+async function getNews() {
+  // Call the shared function directly (no HTTP request needed)
+  const result = await fetchNews()
+  return {
+    articles: result.articles.slice(0, 10), // Get latest 10 articles
+    error: result.error
   }
 }
 
