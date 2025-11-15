@@ -58,12 +58,12 @@ export async function GET() {
         headers: Object.fromEntries(response.headers.entries())
       })
       
-      // Handle specific error codes
+      // Handle specific error codes with user-friendly messages
       if (response.status === 401) {
         return NextResponse.json(
           {
             error: 'Invalid API Key',
-            message: 'Your NewsAPI key is invalid or expired. Please check your API key.',
+            message: 'Your NewsAPI key is invalid or expired. Please verify your API key in the Vercel environment variables settings.',
             status: 401
           },
           { status: 401 }
@@ -74,10 +74,21 @@ export async function GET() {
         return NextResponse.json(
           {
             error: 'Rate Limit Exceeded',
-            message: 'You have exceeded the free tier rate limit (100 requests/day). Please try again later.',
+            message: 'You have reached the daily request limit (100 requests/day on the free tier). The limit will reset tomorrow, or you can upgrade your NewsAPI plan.',
             status: 429
           },
           { status: 429 }
+        )
+      }
+      
+      if (response.status === 426) {
+        return NextResponse.json(
+          {
+            error: 'Upgrade Required',
+            message: 'This endpoint requires a paid NewsAPI plan. The free tier only supports the top-headlines endpoint.',
+            status: 426
+          },
+          { status: 426 }
         )
       }
       
@@ -129,7 +140,7 @@ export async function GET() {
       return NextResponse.json(
         { 
           error: 'Request Timeout',
-          message: 'The request to NewsAPI timed out. This might be a temporary issue.',
+          message: 'The request took too long to complete. This could be due to network issues or NewsAPI being temporarily unavailable. Please try again in a few moments.',
         },
         { status: 504 }
       )
@@ -139,8 +150,8 @@ export async function GET() {
     if (error instanceof Error && (error.message.includes('fetch') || error.message.includes('network'))) {
       return NextResponse.json(
         { 
-          error: 'Network Error',
-          message: 'Failed to connect to NewsAPI. Please check your internet connection or try again later.',
+          error: 'Connection Error',
+          message: 'Unable to connect to the news service. Please check your internet connection and try again.',
         },
         { status: 503 }
       )

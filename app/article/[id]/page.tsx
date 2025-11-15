@@ -20,7 +20,9 @@ async function getArticle(id: string): Promise<Article | null> {
       if (response.status === 404) {
         return null
       }
-      throw new Error('Failed to fetch article')
+      const errorData = await response.json().catch(() => ({}))
+      console.error('Error fetching article:', errorData)
+      return null
     }
 
     const article: Article = await response.json()
