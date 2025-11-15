@@ -1,36 +1,11 @@
 import Header from '@/components/Header'
 import ArticleContent from '@/components/ArticleContent'
-import type { Article } from '@/types/article'
+import { fetchArticleById } from '@/lib/fetchArticle'
 import { notFound } from 'next/navigation'
 
-async function getArticle(id: string): Promise<Article | null> {
-  try {
-    // Use absolute URL for server-side fetch
-    // Next.js already decodes the params, so we need to encode it for the URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-    const encodedId = encodeURIComponent(id)
-    const response = await fetch(`${baseUrl}/api/news/${encodedId}`, {
-      cache: 'no-store',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        return null
-      }
-      const errorData = await response.json().catch(() => ({}))
-      console.error('Error fetching article:', errorData)
-      return null
-    }
-
-    const article: Article = await response.json()
-    return article
-  } catch (error) {
-    console.error('Error fetching article:', error)
-    return null
-  }
+async function getArticle(id: string) {
+  // Call the shared function directly (no HTTP request needed)
+  return await fetchArticleById(id)
 }
 
 export default async function ArticlePage({
