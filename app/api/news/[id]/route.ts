@@ -46,13 +46,11 @@ export async function GET(
       )
     }
 
-    // Use the same query as homepage to find the article
-    const query = 'stock market OR stocks OR trading OR finance OR investing'
-    
-    // Try multiple pages to find the article
+    // NewsAPI free tier only supports top-headlines endpoint
+    // Try multiple pages of top-headlines to find the article
     for (let page = 1; page <= 5; page++) {
       const response = await fetch(
-        `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=publishedAt&pageSize=100&page=${page}&language=en&apiKey=${apiKey}`,
+        `https://newsapi.org/v2/top-headlines?category=business&country=us&pageSize=100&page=${page}&apiKey=${apiKey}`,
         {
           headers: {
             'User-Agent': 'Market Watcher',

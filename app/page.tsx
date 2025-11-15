@@ -58,9 +58,14 @@ export default async function Home() {
               </svg>
             </div>
             <p className="text-gray-700 font-medium mb-2">Unable to load news articles.</p>
-            <p className="text-sm text-gray-500">
-              Please make sure your NEWS_API_KEY is configured in .env.local
+            <p className="text-sm text-gray-500 mb-2">
+              Please check:
             </p>
+            <ul className="text-sm text-gray-500 text-left max-w-md mx-auto space-y-1">
+              <li>• NEWS_API_KEY is set in Vercel environment variables</li>
+              <li>• The API key is valid and active</li>
+              <li>• You haven't exceeded the free tier rate limit (100 requests/day)</li>
+            </ul>
           </div>
         )}
       </main>

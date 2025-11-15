@@ -18,11 +18,10 @@ export async function GET() {
   }
 
   try {
-    // Fetch stock market news from NewsAPI
-    // Using "stock market" keyword search with business/finance terms
-    const query = 'stock market OR stocks OR trading OR finance OR investing'
+    // NewsAPI free tier only supports top-headlines endpoint
+    // Try top-headlines first (works with free tier)
     const response = await fetch(
-      `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=publishedAt&pageSize=10&language=en&apiKey=${apiKey}`,
+      `https://newsapi.org/v2/top-headlines?category=business&country=us&pageSize=10&apiKey=${apiKey}`,
       {
         headers: {
           'User-Agent': 'Market Watcher',
@@ -32,36 +31,41 @@ export async function GET() {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      console.error('NewsAPI everything endpoint failed:', response.status, errorData)
-      
-      // Fallback to top headlines if everything endpoint fails
-      const fallbackResponse = await fetch(
-        `https://newsapi.org/v2/top-headlines?category=business&country=us&pageSize=10&apiKey=${apiKey}`
-      )
-      
-      if (!fallbackResponse.ok) {
-        const fallbackError = await fallbackResponse.json().catch(() => ({}))
-        console.error('NewsAPI top-headlines endpoint failed:', fallbackResponse.status, fallbackError)
-        throw new Error(`Failed to fetch news: ${fallbackResponse.status}`)
-      }
-      
-      const fallbackData: NewsApiResponse = await fallbackResponse.json()
-      // Add internal IDs to articles for clean URLs
-      const articlesWithIds: Article[] = fallbackData.articles.map((article) => ({
-        ...article,
-        _id: createArticleId(article),
-      }))
-      
-      // Cache articles for later retrieval
-      cacheArticles(articlesWithIds, createArticleId)
-      
-      return NextResponse.json({
-        ...fallbackData,
-        articles: articlesWithIds,
+      console.error('NewsAPI top-headlines failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+        apiKeyPresent: !!apiKey,
+        apiKeyLength: apiKey?.length || 0
       })
+      
+      // Return detailed error for debugging
+      return NextResponse.json(
+        {
+          error: 'Failed to fetch news from NewsAPI',
+          status: response.status,
+          message: errorData.message || errorData.code || 'Unknown error',
+          details: errorData
+        },
+        { status: response.status }
+      )
     }
 
     const data: NewsApiResponse = await response.json()
+    
+    // Check if we got articles
+    if (!data.articles || data.articles.length === 0) {
+      console.warn('NewsAPI returned empty articles array')
+      return NextResponse.json(
+        {
+          error: 'No articles found',
+          message: 'NewsAPI returned no articles. This might be a temporary issue.',
+          articles: []
+        },
+        { status: 200 }
+      )
+    }
+    
     // Add internal IDs to articles for clean URLs
     const articlesWithIds: Article[] = data.articles.map((article) => ({
       ...article,
